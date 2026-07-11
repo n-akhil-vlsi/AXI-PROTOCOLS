@@ -105,7 +105,7 @@ This is simulation-level confidence, not formal verification — there's no UVM 
 |---|---|
 | Language | Verilog |
 | Protocols implemented | AXI4, AXI4-Lite, AXI4-Stream |
-| Modules | 8 |
+| Modules | 6 |
 | Burst types | FIXED, INCR, WRAP |
 | Simulator | Vivado XSIM |
 
