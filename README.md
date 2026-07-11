@@ -44,7 +44,7 @@ The peripherals — GPIO, FIFO, and Arbiter — weren't handed a pre-built AXI i
 
 *(Diagram from [fpgaemu.readthedocs.io](https://fpgaemu.readthedocs.io/en/latest/axi.html))*
 
-![AXI4 channels](axi-full/axi4_channels.png)
+![AXI4 channels](AXI-FULL/axi4_channels.png)
 
 ---
 
