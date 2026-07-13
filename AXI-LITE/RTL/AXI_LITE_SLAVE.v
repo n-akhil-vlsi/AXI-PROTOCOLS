@@ -1,9 +1,5 @@
 `timescale 1ns / 1ps
-// AXI4-Lite Slave
-// Companion slave for the axilite_m master module.
-// - No ID signals (AxID/WID/BID/ARID/RID) - matches axilite_m ports
-// - No burst fields (LEN/SIZE/BURST/LOCK/CACHE/QOS/USER) - AXI-Lite is single-beat only
-// - No WLAST/RLAST
+
 module axils
 (
  input  wire        s_axi_aclk,
@@ -103,7 +99,7 @@ always @(posedge s_axi_aclk) begin
      state <= predict_op;
    end
 
-   predict_op: begin
+   predict_op: begin                         //path will be decided by the which valid is high.
      if (s_axi_awvalid)
        state <= accept_wr;
      else if (s_axi_arvalid)
@@ -113,7 +109,7 @@ always @(posedge s_axi_aclk) begin
    // ---------------- WRITE PATH ----------------
    accept_wr: begin
      if (s_axi_awaddr < 16) begin
-       waddr         <= s_axi_awaddr;
+       waddr         <= s_axi_awaddr;       //storing the address for accessing the memory location.
        s_axi_awready <= 1'b1;
        state         <= wait_wdata;
      end else begin
@@ -124,7 +120,7 @@ always @(posedge s_axi_aclk) begin
 
    wait_wdata: begin
      s_axi_awready <= 1'b0;
-     if (s_axi_wvalid) begin
+     if (s_axi_wvalid) begin                    //making the awready low as it will be high for only one clock cycle.
        wdata <= s_axi_wdata;
        wstrb <= s_axi_wstrb;
        state <= accept_wdata;
@@ -139,12 +135,12 @@ always @(posedge s_axi_aclk) begin
    end
 
    accept_wdata: begin
-     s_axi_wready <= 1'b1;
+     s_axi_wready <= 1'b1;                   //making the wready high for one clock cycle to accept the data from the master.
      state        <= gen_data;
    end
 
    gen_data: begin
-     s_axi_wready <= 1'b0;
+     s_axi_wready <= 1'b0;                                   //generating the data by multiplying the data bytes with the strb.
      data_write   <= {(wdata[31:24] & {8{wstrb[3]}}),
                        (wdata[23:16] & {8{wstrb[2]}}),
                        (wdata[15:8]  & {8{wstrb[1]}}),
@@ -153,7 +149,7 @@ always @(posedge s_axi_aclk) begin
    end
 
    update_mem: begin
-     if (count < 2) begin
+     if (count < 2) begin                           //here artifical delay of 2 clock cycles are added.
        count      <= count + 1;
        mem[waddr] <= data_write;
        state      <= update_mem;
@@ -180,7 +176,7 @@ always @(posedge s_axi_aclk) begin
 
    // ---------------- READ PATH ----------------
    accept_rd: begin
-     if (s_axi_araddr < 16) begin
+     if (s_axi_araddr < 16) begin                           //valid only for address less than 16 as the memory locations are only 16.
        raddr         <= s_axi_araddr;
        s_axi_arready <= 1'b1;
        state         <= fetch_rdata;
@@ -192,7 +188,7 @@ always @(posedge s_axi_aclk) begin
 
    fetch_rdata: begin
      s_axi_arready <= 1'b0;
-     if (count < 2) begin
+     if (count < 2) begin                               //artifical delay of 2 clock cycles are added to fetch the data from the memory location.
        count <= count + 1;
        rdata <= mem[raddr];
        state <= fetch_rdata;
