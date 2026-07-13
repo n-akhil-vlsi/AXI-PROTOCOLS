@@ -23,6 +23,11 @@ module top_tb();
     always #10 clk = ~clk;
 
     initial begin
+        $monitor("Time=%0t | newd=%b | din=%0d | dout=%0d | last=%b",
+                   $time, newd, din, dout, last);
+    end
+
+    initial begin
         // Initialize inputs
         rst  = 1'b0;
         newd = 1'b0;
