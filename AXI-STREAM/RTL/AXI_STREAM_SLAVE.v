@@ -8,7 +8,7 @@ module axis_s(
     output wire [7:0] dout
 );
 
-    // State encoding
+    // State encoding for fsm,everything happens in the STORE state.
     parameter IDLE  = 2'b00;
     parameter STORE = 2'b01;
 
@@ -22,7 +22,7 @@ module axis_s(
             state <= next_state;
     end
 
-    // Next-state logic
+    // Next-state logic is combinational,so it uses blocking  assignments.
     always @(*) begin
         case (state)
 
@@ -49,7 +49,7 @@ module axis_s(
         endcase
     end
 
-    // Output logic
+    // Output logic is checked for every clock cycle, and we need to store the data when the state is STORE.
     assign s_axis_tready = (state == STORE);
 
     assign dout = (state == STORE) ? s_axis_tdata : 8'h00;
