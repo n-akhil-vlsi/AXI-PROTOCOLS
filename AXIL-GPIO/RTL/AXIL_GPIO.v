@@ -1,8 +1,8 @@
-module axilite_s
+module axil_gpio                                       //it is a axi-lite slave module for GPIO control.
 (
     input  wire        s_axi_aclk,
     input  wire        s_axi_aresetn,
-
+     
     input  wire        s_axi_awvalid,
     output reg         s_axi_awready,
     input  wire [31:0]  s_axi_awaddr,
@@ -55,7 +55,7 @@ module axilite_s
 
     reg [3:0]  state = 0;
     reg [31:0] waddr = 0, wdata = 0, data_write = 0, raddr = 0,
-               sw_reg = 0, rdata = 0, sw_reg_deb = 0;
+               sw_reg = 0, rdata_int = 0, sw_reg_deb = 0;
     reg [3:0]  wstrb = 0;
     reg [1:0]  count = 0;
 
@@ -64,36 +64,26 @@ module axilite_s
 
     integer dcount = 0;
 
-    //-----------------------------------------------------------------
     // Debounce logic for switches
-    //-----------------------------------------------------------------
-    always @(posedge s_axi_aclk) begin
+ always @(posedge s_axi_aclk) begin
         if (s_axi_aresetn == 0) begin
             sw_reg     <= 32'h0;
-            sw_reg_deb <= 32'h0;
+            sw_reg_deb <= sw;
             dcount     <= 0;
         end
-        else if (dcount == 0) begin
-            sw_reg_deb <= sw;
-            dcount     <= dcount + 1;
+        else if (sw != sw_reg_deb) begin
+            sw_reg_deb <= sw;   // value changed -> restart the stability window
+            dcount     <= 0;
         end
         else if (dcount == 5) begin
-            if (sw_reg_deb == sw) begin
-                sw_reg <= sw_reg_deb;
-                dcount <= 0;
-            end
-            else begin
-                dcount <= 0;
-            end
+            sw_reg <= sw_reg_deb;   // stayed the same for 5 full cycles -> accept
+            dcount <= dcount;       // stays at 5, or reset to 0 for re-check, your choice
         end
         else begin
             dcount <= dcount + 1;
         end
     end
 
-    //-----------------------------------------------------------------
-    // Main FSM: handles AXI-Lite write and read transactions
-    //-----------------------------------------------------------------
     always @(posedge s_axi_aclk) begin
         if (s_axi_aresetn == 0) begin
             state <= idle;
@@ -101,7 +91,7 @@ module axilite_s
             waddr<= 0;
             wdata<= 0;
             wstrb<= 0;
-            rdata<=0;
+            rdata_int<=0;
             raddr<=0;
         end
         else begin
@@ -120,8 +110,8 @@ module axilite_s
                 end
 
                 predict_op: begin
-                    if (s_axi_awvalid && s_axi_awaddr == 4)
-                        state <= accept_wr;
+                    if (s_axi_awvalid && s_axi_awaddr == 4)                             // assuming address for led is 4 and for switches is 8.
+                        state <= accept_wr;                                             // led can read and write,whereas switches can only read.
                     else if (s_axi_arvalid && (s_axi_araddr == 8 | s_axi_araddr == 4))
                         state <= accept_rd;
                     else
@@ -162,7 +152,7 @@ module axilite_s
 
                 update_reg: begin
                     led <= data_write;
-                    if (count < 2) begin
+                    if (count < 2) begin                              //artifical delay of 2 clock cycles.
                         count <= count + 1;
                         state <= update_reg;
                     end
@@ -195,7 +185,7 @@ module axilite_s
                     if (count < 2) begin
                         count <= count + 1;
                         state <= fetch_rdata;
-                        rdata <= (raddr == 4) ? led :
+                        rdata_int <= (raddr == 4) ? led :
                                  ((raddr == 8) ? sw_reg : 32'h0);
                     end
                     else begin
@@ -206,7 +196,7 @@ module axilite_s
 
                 send_rdata: begin
                     s_axi_rvalid <= 1'b1;
-                    s_axi_rdata  <= rdata;
+                    s_axi_rdata  <= rdata_int;
                     s_axi_rresp  <= 2'b00;
                     if (s_axi_rready) begin
                         state <= idle;
