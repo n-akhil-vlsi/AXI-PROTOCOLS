@@ -1,0 +1,72 @@
+[145000] MASTER SEND WDATA burst_count=4 WLAST=0
+[155000] WRITE DATA = aabbccdd  WLAST = 0
+[155000] MASTER SEND WDATA burst_count=4 WLAST=0
+[165000] MASTER SEND WDATA burst_count=3 WLAST=0
+[175000] MASTER SEND WDATA burst_count=3 WLAST=0
+[185000] MASTER SEND WDATA burst_count=3 WLAST=0
+[195000] MASTER SEND WDATA burst_count=3 WLAST=0
+[195000] WRITE addr=16 burst_len=4
+[205000] MASTER SEND WDATA burst_count=3 WLAST=0
+[215000] MASTER SEND WDATA burst_count=3 WLAST=0
+[225000] WRITE DATA = ac570195  WLAST = 0
+[225000] MASTER SEND WDATA burst_count=3 WLAST=0
+[235000] MASTER SEND WDATA burst_count=2 WLAST=0
+[245000] MASTER SEND WDATA burst_count=2 WLAST=0
+[255000] MASTER SEND WDATA burst_count=2 WLAST=0
+[265000] MASTER SEND WDATA burst_count=2 WLAST=0
+[265000] WRITE addr=16 burst_len=3
+[275000] MASTER SEND WDATA burst_count=2 WLAST=0
+[285000] MASTER SEND WDATA burst_count=2 WLAST=0
+[295000] WRITE DATA = 5db307e9  WLAST = 0
+[295000] MASTER SEND WDATA burst_count=2 WLAST=0
+[305000] MASTER SEND WDATA burst_count=1 WLAST=0
+[315000] MASTER SEND WDATA burst_count=1 WLAST=0
+[325000] MASTER SEND WDATA burst_count=1 WLAST=0
+[335000] MASTER SEND WDATA burst_count=1 WLAST=0
+[335000] WRITE addr=16 burst_len=2
+[345000] MASTER SEND WDATA burst_count=1 WLAST=0
+[355000] MASTER SEND WDATA burst_count=1 WLAST=0
+[365000] WRITE DATA = d47f278d  WLAST = 0
+[365000] MASTER SEND WDATA burst_count=1 WLAST=0
+[405000] WRITE addr=16 burst_len=1
+
+==============================
+ FIXED WRITE COMPLETED 
+==============================
+mem[16] = 8d
+mem[17] = 27
+mem[18] = 7f
+mem[19] = d4
+[615000] READ addr=16 rdata=d47f278d
+[625000] READ addr=16 rdata=d47f278d
+[645000] SEND DATA addr=16 data=d47f278d rlast=0
+[655000] READ DATA = d47f278d  RLAST = 0
+[655000] NEXT ADDR=16 remaining=4
+[665000] READ addr=16 rdata=d47f278d
+[675000] READ addr=16 rdata=d47f278d
+[695000] SEND DATA addr=16 data=d47f278d rlast=0
+[705000] READ DATA = d47f278d  RLAST = 0
+[705000] NEXT ADDR=16 remaining=3
+[715000] READ addr=16 rdata=d47f278d
+[725000] READ addr=16 rdata=d47f278d
+[745000] SEND DATA addr=16 data=d47f278d rlast=0
+[755000] READ DATA = d47f278d  RLAST = 0
+[755000] NEXT ADDR=16 remaining=2
+[765000] READ addr=16 rdata=d47f278d
+[775000] READ addr=16 rdata=d47f278d
+[795000] SEND DATA addr=16 data=d47f278d rlast=0
+[805000] READ DATA = d47f278d  RLAST = 0
+[805000] NEXT ADDR=16 remaining=1
+[845000] READ DATA = d47f278d  RLAST = 1
+
+==============================
+ FIXED READ COMPLETED 
+==============================
+ROUT = d47f278d
+RESP = 00
+
+Memory Contents:
+mem[16] = 8d
+mem[17] = 27
+mem[18] = 7f
+mem[19] = d4

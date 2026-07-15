@@ -1,0 +1,96 @@
+[145000] MASTER SEND WDATA burst_count=4 WLAST=0
+[155000] WRITE DATA = aabbccdd  WLAST = 0
+[155000] MASTER SEND WDATA burst_count=4 WLAST=0
+[165000] MASTER SEND WDATA burst_count=3 WLAST=0
+[175000] MASTER SEND WDATA burst_count=3 WLAST=0
+[185000] MASTER SEND WDATA burst_count=3 WLAST=0
+[195000] MASTER SEND WDATA burst_count=3 WLAST=0
+[195000] WRITE addr=24 burst_len=4
+[205000] MASTER SEND WDATA burst_count=3 WLAST=0
+[215000] MASTER SEND WDATA burst_count=3 WLAST=0
+[225000] WRITE DATA = ac570195  WLAST = 0
+[225000] MASTER SEND WDATA burst_count=3 WLAST=0
+[235000] MASTER SEND WDATA burst_count=2 WLAST=0
+[245000] MASTER SEND WDATA burst_count=2 WLAST=0
+[255000] MASTER SEND WDATA burst_count=2 WLAST=0
+[265000] MASTER SEND WDATA burst_count=2 WLAST=0
+[265000] WRITE addr=28 burst_len=3
+[275000] MASTER SEND WDATA burst_count=2 WLAST=0
+[285000] MASTER SEND WDATA burst_count=2 WLAST=0
+[295000] WRITE DATA = 5db307e9  WLAST = 0
+[295000] MASTER SEND WDATA burst_count=2 WLAST=0
+[305000] MASTER SEND WDATA burst_count=1 WLAST=0
+[315000] MASTER SEND WDATA burst_count=1 WLAST=0
+[325000] MASTER SEND WDATA burst_count=1 WLAST=0
+[335000] MASTER SEND WDATA burst_count=1 WLAST=0
+[335000] WRITE addr=16 burst_len=2
+[345000] MASTER SEND WDATA burst_count=1 WLAST=0
+[355000] MASTER SEND WDATA burst_count=1 WLAST=0
+[365000] WRITE DATA = d47f278d  WLAST = 0
+[365000] MASTER SEND WDATA burst_count=1 WLAST=0
+[405000] WRITE addr=20 burst_len=1
+
+WRAP WRITE COMPLETED
+mem[16] = e9
+mem[17] = 07
+mem[18] = b3
+mem[19] = 5d
+mem[20] = 8d
+mem[21] = 27
+mem[22] = 7f
+mem[23] = d4
+mem[24] = dd
+mem[25] = cc
+mem[26] = bb
+mem[27] = aa
+mem[28] = 95
+mem[29] = 01
+mem[30] = 57
+mem[31] = ac
+[615000] READ addr=24 rdata=aabbccdd
+[625000] READ addr=24 rdata=aabbccdd
+[645000] SEND DATA addr=24 data=aabbccdd rlast=0
+[655000] READ DATA = aabbccdd  RLAST = 0
+[655000] NEXT ADDR=24 remaining=4
+[665000] READ addr=28 rdata=ac570195
+[675000] READ addr=28 rdata=ac570195
+[695000] SEND DATA addr=28 data=ac570195 rlast=0
+[705000] READ DATA = ac570195  RLAST = 0
+[705000] NEXT ADDR=28 remaining=3
+[715000] READ addr=16 rdata=5db307e9
+[725000] READ addr=16 rdata=5db307e9
+[745000] SEND DATA addr=16 data=5db307e9 rlast=0
+[755000] READ DATA = 5db307e9  RLAST = 0
+[755000] NEXT ADDR=16 remaining=2
+[765000] READ addr=20 rdata=d47f278d
+[775000] READ addr=20 rdata=d47f278d
+[795000] SEND DATA addr=20 data=d47f278d rlast=0
+[805000] READ DATA = d47f278d  RLAST = 0
+[805000] NEXT ADDR=20 remaining=1
+[845000] READ DATA = aabbccdd  RLAST = 1
+
+WRAP READ COMPLETED
+ROUT = aabbccdd
+RESP = 00
+
+Memory Contents:
+mem[16] = e9
+mem[17] = 07
+mem[18] = b3
+mem[19] = 5d
+mem[20] = 8d
+mem[21] = 27
+mem[22] = 7f
+mem[23] = d4
+mem[24] = dd
+mem[25] = cc
+mem[26] = bb
+mem[27] = aa
+mem[28] = 95
+mem[29] = 01
+mem[30] = 57
+mem[31] = ac
+$finish called at time : 925 ns : File "E:/vivado_AXI/axilfull_burst/axilfull_burst.srcs/sim_1/new/axif_tb.v" Line 170
+INFO: [USF-XSim-96] XSim completed. Design snapshot 'axif_tb_behav' loaded.
+INFO: [USF-XSim-97] XSim simulation ran for 1000ns
+launch_simulation: Time (s): cpu = 00:00:03 ; elapsed = 00:00:07 . Memory (MB): peak = 2735.312 ; gain = 0.000

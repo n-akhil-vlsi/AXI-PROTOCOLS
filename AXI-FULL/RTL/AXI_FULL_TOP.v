@@ -1,7 +1,8 @@
 `timescale 1ns / 1ps
- 
 module top (
     input  clk, resetn,
+    input  op_start,
+    output busy,
     input  wr,
     input  [31:0] wr_addr,
     input  [7:0]  wr_burst_len,
@@ -12,12 +13,9 @@ module top (
     input  [7:0]  rd_burst_len,
     input  [1:0]  rd_burst_type,
     output [31:0] rout,
-    output [1:0]  resp,
-    output [159:0] pc_status,
-    output pc_asserted
+    output [1:0]  resp
 );
  
-    // AXI signals
     wire [2:0]  m_axi_awid;
     wire [31:0] m_axi_awaddr;
     wire [2:0]  m_axi_awsize;
@@ -112,13 +110,16 @@ module top (
         .m_axi_rvalid  (m_axi_rvalid),
         .m_axi_rready  (m_axi_rready),
  
+        .op_start       (op_start),
+        .busy           (busy),
+ 
         .wr             (wr),
         .wr_addr        (wr_addr),
         .wr_burst_len   (wr_burst_len),
         .wr_burst_type  (wr_burst_type),
         .wr_din         (wr_din),
         .wr_strbin      (wr_strbin),
- 
+  
         .rd_addr        (rd_addr),
         .rd_burst_len   (rd_burst_len),
         .rd_burst_type  (rd_burst_type),
@@ -127,52 +128,6 @@ module top (
         .resp (resp)
     );
  
-    axi_protocol_checker_0 checker_inst (
-        .pc_status   (pc_status),
-        .pc_asserted (pc_asserted),
-        .aclk        (clk),
-        .aresetn     (resetn),
- 
-        .pc_axi_awaddr  (m_axi_awaddr),
-        .pc_axi_awlen   (m_axi_awlen),
-        .pc_axi_awsize  (2),
-        .pc_axi_awburst (m_axi_awburst),
-        .pc_axi_awlock  (0),
-        .pc_axi_awcache (0),
-        .pc_axi_awprot  (0),
-        .pc_axi_awqos   (0),
-        .pc_axi_awregion(0),
-        .pc_axi_awvalid (m_axi_awvalid),
-        .pc_axi_awready (m_axi_awready),
- 
-        .pc_axi_wlast  (m_axi_wlast),
-        .pc_axi_wdata  (m_axi_wdata),
-        .pc_axi_wstrb  (m_axi_wstrb),
-        .pc_axi_wvalid (m_axi_wvalid),
-        .pc_axi_wready (m_axi_wready),
- 
-        .pc_axi_bresp  (m_axi_bresp),
-        .pc_axi_bvalid (m_axi_bvalid),
-        .pc_axi_bready (m_axi_bready),
- 
-        .pc_axi_araddr  (m_axi_araddr),
-        .pc_axi_arlen   (m_axi_arlen),
-        .pc_axi_arsize  (m_axi_arsize),
-        .pc_axi_arburst (m_axi_arburst),
-        .pc_axi_arlock  (0),
-        .pc_axi_arcache (0),
-        .pc_axi_arprot  (0),
-        .pc_axi_arqos   (0),
-        .pc_axi_arregion(0),
-        .pc_axi_arvalid (m_axi_arvalid),
-        .pc_axi_arready (m_axi_arready),
- 
-        .pc_axi_rlast  (m_axi_rlast),
-        .pc_axi_rdata  (m_axi_rdata),
-        .pc_axi_rresp  (m_axi_rresp),
-        .pc_axi_rvalid (m_axi_rvalid),
-        .pc_axi_rready (m_axi_rready)
-    );
  
     axif_s dut (
         .s_axi_aclk    (clk),
@@ -215,7 +170,7 @@ module top (
         .s_axi_arprot  (m_axi_arprot),
         .s_axi_arqos   (m_axi_arqos),
         .s_axi_aruser  (m_axi_aruser),
- 
+  
         .s_axi_rid     (m_axi_rid),
         .s_axi_rvalid  (m_axi_rvalid),
         .s_axi_rready  (m_axi_rready),

@@ -2,7 +2,7 @@
 module axif_s (
     input  wire        s_axi_aclk,
     input  wire        s_axi_aresetn,
- 
+  
     input  wire [2:0]  s_axi_awid,
     input  wire        s_axi_awvalid,
     output reg         s_axi_awready,
@@ -92,689 +92,233 @@ module axif_s (
     reg [31:0] data_write = 0;
     reg [1:0]  count = 0;
  
-    //////////////////////////////////////////////////////////////
-    // Fixed-mode write byte merge
-    //////////////////////////////////////////////////////////////
     function [31:0] data_wr_fixed(input [3:0] wstrb, input [31:0] awaddrt);
         begin
             case (wstrb)
-                4'b0001: begin
-                    mem[awaddrt] = wdata[7:0];
-                end
- 
-                4'b0010: begin
-                    mem[awaddrt] = wdata[15:8];
-                end
- 
-                4'b0011: begin
-                    mem[awaddrt]     = wdata[7:0];
-                    mem[awaddrt + 1] = wdata[15:8];
-                end
- 
-                4'b0100: begin
-                    mem[awaddrt] = wdata[23:16];
-                end
- 
-                4'b0101: begin
-                    mem[awaddrt]     = wdata[7:0];
-                    mem[awaddrt + 1] = wdata[23:16];
-                end
- 
-                4'b0110: begin
-                    mem[awaddrt]     = wdata[15:8];
-                    mem[awaddrt + 1] = wdata[23:16];
-                end
- 
-                4'b0111: begin
-                    mem[awaddrt]     = wdata[7:0];
-                    mem[awaddrt + 1] = wdata[15:8];
-                    mem[awaddrt + 2] = wdata[23:16];
-                end
- 
-                4'b1000: begin
-                    mem[awaddrt] = wdata[31:24];
-                end
- 
-                4'b1001: begin
-                    mem[awaddrt]     = wdata[7:0];
-                    mem[awaddrt + 1] = wdata[31:24];
-                end
- 
-                4'b1010: begin
-                    mem[awaddrt]     = wdata[15:8];
-                    mem[awaddrt + 1] = wdata[31:24];
-                end
- 
-                4'b1011: begin
-                    mem[awaddrt]     = wdata[7:0];
-                    mem[awaddrt + 1] = wdata[15:8];
-                    mem[awaddrt + 2] = wdata[31:24];
-                end
- 
-                4'b1100: begin
-                    mem[awaddrt]     = wdata[23:16];
-                    mem[awaddrt + 1] = wdata[31:24];
-                end
- 
-                4'b1101: begin
-                    mem[awaddrt]     = wdata[7:0];
-                    mem[awaddrt + 1] = wdata[23:16];
-                    mem[awaddrt + 2] = wdata[31:24];
-                end
- 
-                4'b1110: begin
-                    mem[awaddrt]     = wdata[15:8];
-                    mem[awaddrt + 1] = wdata[23:16];
-                    mem[awaddrt + 2] = wdata[31:24];
-                end
- 
-                4'b1111: begin
-                    mem[awaddrt]     = wdata[7:0];
-                    mem[awaddrt + 1] = wdata[15:8];
-                    mem[awaddrt + 2] = wdata[23:16];
-                    mem[awaddrt + 3] = wdata[31:24];
-                end
+                4'b0001: begin mem[awaddrt] = wdata[7:0]; end
+                4'b0010: begin mem[awaddrt] = wdata[15:8]; end
+                4'b0011: begin mem[awaddrt] = wdata[7:0]; mem[awaddrt + 1] = wdata[15:8]; end
+                4'b0100: begin mem[awaddrt] = wdata[23:16]; end
+                4'b0101: begin mem[awaddrt] = wdata[7:0]; mem[awaddrt + 1] = wdata[23:16]; end
+                4'b0110: begin mem[awaddrt] = wdata[15:8]; mem[awaddrt + 1] = wdata[23:16]; end
+                4'b0111: begin mem[awaddrt] = wdata[7:0]; mem[awaddrt + 1] = wdata[15:8]; mem[awaddrt + 2] = wdata[23:16]; end
+                4'b1000: begin mem[awaddrt] = wdata[31:24]; end
+                4'b1001: begin mem[awaddrt] = wdata[7:0]; mem[awaddrt + 1] = wdata[31:24]; end
+                4'b1010: begin mem[awaddrt] = wdata[15:8]; mem[awaddrt + 1] = wdata[31:24]; end
+                4'b1011: begin mem[awaddrt] = wdata[7:0]; mem[awaddrt + 1] = wdata[15:8]; mem[awaddrt + 2] = wdata[31:24]; end
+                4'b1100: begin mem[awaddrt] = wdata[23:16]; mem[awaddrt + 1] = wdata[31:24]; end
+                4'b1101: begin mem[awaddrt] = wdata[7:0]; mem[awaddrt + 1] = wdata[23:16]; mem[awaddrt + 2] = wdata[31:24]; end
+                4'b1110: begin mem[awaddrt] = wdata[15:8]; mem[awaddrt + 1] = wdata[23:16]; mem[awaddrt + 2] = wdata[31:24]; end
+                4'b1111: begin mem[awaddrt] = wdata[7:0]; mem[awaddrt + 1] = wdata[15:8]; mem[awaddrt + 2] = wdata[23:16]; mem[awaddrt + 3] = wdata[31:24]; end
             endcase
             data_wr_fixed = awaddrt;
         end
     endfunction
  
-    //////////////////////////////////////////////////////////////
-    // Incr-mode write byte merge
-    //////////////////////////////////////////////////////////////
     reg [31:0] addr = 0;
     function [31:0] data_wr_incr(input [3:0] wstrb, input [31:0] awaddrt);
         begin
             case (wstrb)
-                4'b0001: begin
-                    mem[awaddrt] = wdata[7:0];
-                    addr = awaddrt + 1;
-                end
- 
-                4'b0010: begin
-                    mem[awaddrt] = wdata[15:8];
-                    addr = awaddrt + 1;
-                end
- 
-                4'b0011: begin
-                    mem[awaddrt]     = wdata[7:0];
-                    mem[awaddrt + 1] = wdata[15:8];
-                    addr = awaddrt + 2;
-                end
- 
-                4'b0100: begin
-                    mem[awaddrt] = wdata[23:16];
-                    addr = awaddrt + 1;
-                end
- 
-                4'b0101: begin
-                    mem[awaddrt]     = wdata[7:0];
-                    mem[awaddrt + 1] = wdata[23:16];
-                    addr = awaddrt + 2;
-                end
- 
-                4'b0110: begin
-                    mem[awaddrt]     = wdata[15:8];
-                    mem[awaddrt + 1] = wdata[23:16];
-                    addr = awaddrt + 2;
-                end
- 
-                4'b0111: begin
-                    mem[awaddrt]     = wdata[7:0];
-                    mem[awaddrt + 1] = wdata[15:8];
-                    mem[awaddrt + 2] = wdata[23:16];
-                    addr = awaddrt + 3;
-                end
- 
-                4'b1000: begin
-                    mem[awaddrt] = wdata[31:24];
-                    addr = awaddrt + 1;
-                end
- 
-                4'b1001: begin
-                    mem[awaddrt]     = wdata[7:0];
-                    mem[awaddrt + 1] = wdata[31:24];
-                    addr = awaddrt + 2;
-                end
- 
-                4'b1010: begin
-                    mem[awaddrt]     = wdata[15:8];
-                    mem[awaddrt + 1] = wdata[31:24];
-                    addr = awaddrt + 2;
-                end
- 
-                4'b1011: begin
-                    mem[awaddrt]     = wdata[7:0];
-                    mem[awaddrt + 1] = wdata[15:8];
-                    mem[awaddrt + 2] = wdata[31:24];
-                    addr = awaddrt + 3;
-                end
- 
-                4'b1100: begin
-                    mem[awaddrt]     = wdata[23:16];
-                    mem[awaddrt + 1] = wdata[31:24];
-                    addr = awaddrt + 2;
-                end
- 
-                4'b1101: begin
-                    mem[awaddrt]     = wdata[7:0];
-                    mem[awaddrt + 1] = wdata[23:16];
-                    mem[awaddrt + 2] = wdata[31:24];
-                    addr = awaddrt + 3;
-                end
- 
-                4'b1110: begin
-                    mem[awaddrt]     = wdata[15:8];
-                    mem[awaddrt + 1] = wdata[23:16];
-                    mem[awaddrt + 2] = wdata[31:24];
-                    addr = awaddrt + 3;
-                end
- 
-                4'b1111: begin
-                    mem[awaddrt]     = wdata[7:0];
-                    mem[awaddrt + 1] = wdata[15:8];
-                    mem[awaddrt + 2] = wdata[23:16];
-                    mem[awaddrt + 3] = wdata[31:24];
-                    addr = awaddrt + 4;
-                end
+                4'b0001: begin mem[awaddrt] = wdata[7:0]; addr = awaddrt + 1; end
+                4'b0010: begin mem[awaddrt] = wdata[15:8]; addr = awaddrt + 1; end
+                4'b0011: begin mem[awaddrt] = wdata[7:0]; mem[awaddrt + 1] = wdata[15:8]; addr = awaddrt + 2; end
+                4'b0100: begin mem[awaddrt] = wdata[23:16]; addr = awaddrt + 1; end
+                4'b0101: begin mem[awaddrt] = wdata[7:0]; mem[awaddrt + 1] = wdata[23:16]; addr = awaddrt + 2; end
+                4'b0110: begin mem[awaddrt] = wdata[15:8]; mem[awaddrt + 1] = wdata[23:16]; addr = awaddrt + 2; end
+                4'b0111: begin mem[awaddrt] = wdata[7:0]; mem[awaddrt + 1] = wdata[15:8]; mem[awaddrt + 2] = wdata[23:16]; addr = awaddrt + 3; end
+                4'b1000: begin mem[awaddrt] = wdata[31:24]; addr = awaddrt + 1; end
+                4'b1001: begin mem[awaddrt] = wdata[7:0]; mem[awaddrt + 1] = wdata[31:24]; addr = awaddrt + 2; end
+                4'b1010: begin mem[awaddrt] = wdata[15:8]; mem[awaddrt + 1] = wdata[31:24]; addr = awaddrt + 2; end
+                4'b1011: begin mem[awaddrt] = wdata[7:0]; mem[awaddrt + 1] = wdata[15:8]; mem[awaddrt + 2] = wdata[31:24]; addr = awaddrt + 3; end
+                4'b1100: begin mem[awaddrt] = wdata[23:16]; mem[awaddrt + 1] = wdata[31:24]; addr = awaddrt + 2; end
+                4'b1101: begin mem[awaddrt] = wdata[7:0]; mem[awaddrt + 1] = wdata[23:16]; mem[awaddrt + 2] = wdata[31:24]; addr = awaddrt + 3; end
+                4'b1110: begin mem[awaddrt] = wdata[15:8]; mem[awaddrt + 1] = wdata[23:16]; mem[awaddrt + 2] = wdata[31:24]; addr = awaddrt + 3; end
+                4'b1111: begin mem[awaddrt] = wdata[7:0]; mem[awaddrt + 1] = wdata[15:8]; mem[awaddrt + 2] = wdata[23:16]; mem[awaddrt + 3] = wdata[31:24]; addr = awaddrt + 4; end
             endcase
             data_wr_incr = addr;
         end
     endfunction
  
-    //////////////////////////////////////////////////////////////
-    // Wrap boundary calculation
-    //////////////////////////////////////////////////////////////
     reg [7:0] boundary_wr;
     function [7:0] wrap_boundary(input [3:0] awlen, input [2:0] awsize);
         begin
             case (awlen)
-                4'b0001: begin
-                    case (awsize)
-                        3'b000: begin
-                            boundary_wr = 2 * 1;
-                        end
-                        3'b001: begin
-                            boundary_wr = 2 * 2;
-                        end
-                        3'b010: begin
-                            boundary_wr = 2 * 4;
-                        end
-                    endcase
-                end
- 
-                4'b0011: begin
-                    case (awsize)
-                        3'b000: begin
-                            boundary_wr = 4 * 1;
-                        end
-                        3'b001: begin
-                            boundary_wr = 4 * 2;
-                        end
-                        3'b010: begin
-                            boundary_wr = 4 * 4;
-                        end
-                    endcase
-                end
- 
-                4'b0111: begin
-                    case (awsize)
-                        3'b000: begin
-                            boundary_wr = 8 * 1;
-                        end
-                        3'b001: begin
-                            boundary_wr = 8 * 2;
-                        end
-                        3'b010: begin
-                            boundary_wr = 8 * 4;
-                        end
-                    endcase
-                end
- 
-                4'b1111: begin
-                    case (awsize)
-                        3'b000: begin
-                            boundary_wr = 16 * 1;
-                        end
-                        3'b001: begin
-                            boundary_wr = 16 * 2;
-                        end
-                        3'b010: begin
-                            boundary_wr = 16 * 4;
-                        end
-                    endcase
-                end
+                4'b0001: begin case (awsize) 3'b000: boundary_wr = 2*1; 3'b001: boundary_wr = 2*2; 3'b010: boundary_wr = 2*4; endcase end
+                4'b0011: begin case (awsize) 3'b000: boundary_wr = 4*1; 3'b001: boundary_wr = 4*2; 3'b010: boundary_wr = 4*4; endcase end
+                4'b0111: begin case (awsize) 3'b000: boundary_wr = 8*1; 3'b001: boundary_wr = 8*2; 3'b010: boundary_wr = 8*4; endcase end
+                4'b1111: begin case (awsize) 3'b000: boundary_wr = 16*1; 3'b001: boundary_wr = 16*2; 3'b010: boundary_wr = 16*4; endcase end
             endcase
- 
             wrap_boundary = boundary_wr;
         end
     endfunction
  
-    //////////////////////////////////////////////////////////////
-    // Wrap-mode write byte merge
-    //////////////////////////////////////////////////////////////
     reg [31:0] addr1, addr2, addr3, addr4;
     reg [31:0] nextaddr, nextaddr2;
     function [31:0] data_wr_wrap(input [3:0] wstrb, input [31:0] awaddrt, input [7:0] wboundary);
         begin
             case (wstrb)
-                //////////////////////////////////////////////////
                 4'b0001: begin
                     mem[awaddrt] = wdata[7:0];
- 
-                    if ((awaddrt + 1) % wboundary == 0)
-                        addr1 = (awaddrt + 1) - wboundary;
-                    else
-                        addr1 = awaddrt + 1;
- 
+                    if ((awaddrt + 1) % wboundary == 0) addr1 = (awaddrt + 1) - wboundary; else addr1 = awaddrt + 1;
                     data_wr_wrap = addr1;
                 end
- 
-                //////////////////////////////////////////////////
                 4'b0010: begin
                     mem[awaddrt] = wdata[15:8];
- 
-                    if ((awaddrt + 1) % wboundary == 0)
-                        addr1 = (awaddrt + 1) - wboundary;
-                    else
-                        addr1 = awaddrt + 1;
- 
+                    if ((awaddrt + 1) % wboundary == 0) addr1 = (awaddrt + 1) - wboundary; else addr1 = awaddrt + 1;
                     data_wr_wrap = addr1;
                 end
- 
-                //////////////////////////////////////////////////
                 4'b0011: begin
                     mem[awaddrt] = wdata[7:0];
- 
-                    if ((awaddrt + 1) % wboundary == 0)
-                        addr1 = (awaddrt + 1) - wboundary;
-                    else
-                        addr1 = awaddrt + 1;
- 
+                    if ((awaddrt + 1) % wboundary == 0) addr1 = (awaddrt + 1) - wboundary; else addr1 = awaddrt + 1;
                     mem[addr1] = wdata[15:8];
- 
-                    if ((addr1 + 1) % wboundary == 0)
-                        addr2 = (addr1 + 1) - wboundary;
-                    else
-                        addr2 = addr1 + 1;
- 
+                    if ((addr1 + 1) % wboundary == 0) addr2 = (addr1 + 1) - wboundary; else addr2 = addr1 + 1;
                     data_wr_wrap = addr2;
                 end
- 
-                //////////////////////////////////////////////////
                 4'b0100: begin
                     mem[awaddrt] = wdata[23:16];
- 
-                    if ((awaddrt + 1) % wboundary == 0)
-                        addr1 = (awaddrt + 1) - wboundary;
-                    else
-                        addr1 = awaddrt + 1;
- 
+                    if ((awaddrt + 1) % wboundary == 0) addr1 = (awaddrt + 1) - wboundary; else addr1 = awaddrt + 1;
                     data_wr_wrap = addr1;
                 end
- 
-                //////////////////////////////////////////////////
                 4'b0101: begin
                     mem[awaddrt] = wdata[7:0];
- 
-                    if ((awaddrt + 1) % wboundary == 0)
-                        addr1 = (awaddrt + 1) - wboundary;
-                    else
-                        addr1 = awaddrt + 1;
- 
+                    if ((awaddrt + 1) % wboundary == 0) addr1 = (awaddrt + 1) - wboundary; else addr1 = awaddrt + 1;
                     mem[addr1] = wdata[23:16];
- 
-                    if ((addr1 + 1) % wboundary == 0)
-                        addr2 = (addr1 + 1) - wboundary;
-                    else
-                        addr2 = addr1 + 1;
- 
+                    if ((addr1 + 1) % wboundary == 0) addr2 = (addr1 + 1) - wboundary; else addr2 = addr1 + 1;
                     data_wr_wrap = addr2;
                 end
- 
-                //////////////////////////////////////////////////
                 4'b0110: begin
                     mem[awaddrt] = wdata[15:8];
- 
-                    if ((awaddrt + 1) % wboundary == 0)
-                        addr1 = (awaddrt + 1) - wboundary;
-                    else
-                        addr1 = awaddrt + 1;
- 
+                    if ((awaddrt + 1) % wboundary == 0) addr1 = (awaddrt + 1) - wboundary; else addr1 = awaddrt + 1;
                     mem[addr1] = wdata[23:16];
- 
-                    if ((addr1 + 1) % wboundary == 0)
-                        addr2 = (addr1 + 1) - wboundary;
-                    else
-                        addr2 = addr1 + 1;
- 
+                    if ((addr1 + 1) % wboundary == 0) addr2 = (addr1 + 1) - wboundary; else addr2 = addr1 + 1;
                     data_wr_wrap = addr2;
                 end
- 
-                //////////////////////////////////////////////////
                 4'b0111: begin
                     mem[awaddrt] = wdata[7:0];
-                    if ((awaddrt + 1) % wboundary == 0)
-                        addr1 = (awaddrt + 1) - wboundary;
-                    else
-                        addr1 = awaddrt + 1;
- 
+                    if ((awaddrt + 1) % wboundary == 0) addr1 = (awaddrt + 1) - wboundary; else addr1 = awaddrt + 1;
                     mem[addr1] = wdata[15:8];
- 
-                    if ((addr1 + 1) % wboundary == 0)
-                        addr2 = (addr1 + 1) - wboundary;
-                    else
-                        addr2 = addr1 + 1;
- 
+                    if ((addr1 + 1) % wboundary == 0) addr2 = (addr1 + 1) - wboundary; else addr2 = addr1 + 1;
                     mem[addr2] = wdata[23:16];
- 
-                    if ((addr2 + 1) % wboundary == 0)
-                        addr3 = (addr2 + 1) - wboundary;
-                    else
-                        addr3 = addr2 + 1;
- 
+                    if ((addr2 + 1) % wboundary == 0) addr3 = (addr2 + 1) - wboundary; else addr3 = addr2 + 1;
                     data_wr_wrap = addr3;
                 end
- 
                 4'b1000: begin
                     mem[awaddrt] = wdata[31:24];
- 
-                    if ((awaddrt + 1) % wboundary == 0)
-                        addr1 = (awaddrt + 1) - wboundary;
-                    else
-                        addr1 = awaddrt + 1;
- 
+                    if ((awaddrt + 1) % wboundary == 0) addr1 = (awaddrt + 1) - wboundary; else addr1 = awaddrt + 1;
                     data_wr_wrap = addr1;
                 end
- 
                 4'b1001: begin
                     mem[awaddrt] = wdata[7:0];
- 
-                    if ((awaddrt + 1) % wboundary == 0)
-                        addr1 = (awaddrt + 1) - wboundary;
-                    else
-                        addr1 = awaddrt + 1;
- 
+                    if ((awaddrt + 1) % wboundary == 0) addr1 = (awaddrt + 1) - wboundary; else addr1 = awaddrt + 1;
                     mem[addr1] = wdata[31:24];
- 
-                    if ((addr1 + 1) % wboundary == 0)
-                        addr2 = (addr1 + 1) - wboundary;
-                    else
-                        addr2 = addr1 + 1;
- 
+                    if ((addr1 + 1) % wboundary == 0) addr2 = (addr1 + 1) - wboundary; else addr2 = addr1 + 1;
                     data_wr_wrap = addr2;
                 end
- 
                 4'b1010: begin
                     mem[awaddrt] = wdata[15:8];
- 
-                    if ((awaddrt + 1) % wboundary == 0)
-                        addr1 = (awaddrt + 1) - wboundary;
-                    else
-                        addr1 = awaddrt + 1;
- 
+                    if ((awaddrt + 1) % wboundary == 0) addr1 = (awaddrt + 1) - wboundary; else addr1 = awaddrt + 1;
                     mem[addr1] = wdata[31:24];
- 
-                    if ((addr1 + 1) % wboundary == 0)
-                        addr2 = (addr1 + 1) - wboundary;
-                    else
-                        addr2 = addr1 + 1;
- 
+                    if ((addr1 + 1) % wboundary == 0) addr2 = (addr1 + 1) - wboundary; else addr2 = addr1 + 1;
                     data_wr_wrap = addr2;
                 end
- 
                 4'b1011: begin
                     mem[awaddrt] = wdata[7:0];
- 
-                    if ((awaddrt + 1) % wboundary == 0)
-                        addr1 = (awaddrt + 1) - wboundary;
-                    else
-                        addr1 = awaddrt + 1;
- 
+                    if ((awaddrt + 1) % wboundary == 0) addr1 = (awaddrt + 1) - wboundary; else addr1 = awaddrt + 1;
                     mem[addr1] = wdata[15:8];
- 
-                    if ((addr1 + 1) % wboundary == 0)
-                        addr2 = (addr1 + 1) - wboundary;
-                    else
-                        addr2 = addr1 + 1;
- 
+                    if ((addr1 + 1) % wboundary == 0) addr2 = (addr1 + 1) - wboundary; else addr2 = addr1 + 1;
                     mem[addr2] = wdata[31:24];
- 
-                    if ((addr2 + 1) % wboundary == 0)
-                        addr3 = (addr2 + 1) - wboundary;
-                    else
-                        addr3 = addr2 + 1;
- 
+                    if ((addr2 + 1) % wboundary == 0) addr3 = (addr2 + 1) - wboundary; else addr3 = addr2 + 1;
                     data_wr_wrap = addr3;
                 end
- 
                 4'b1100: begin
                     mem[awaddrt] = wdata[23:16];
- 
-                    if ((awaddrt + 1) % wboundary == 0)
-                        addr1 = (awaddrt + 1) - wboundary;
-                    else
-                        addr1 = awaddrt + 1;
- 
+                    if ((awaddrt + 1) % wboundary == 0) addr1 = (awaddrt + 1) - wboundary; else addr1 = awaddrt + 1;
                     mem[addr1] = wdata[31:24];
- 
-                    if ((addr1 + 1) % wboundary == 0)
-                        addr2 = (addr1 + 1) - wboundary;
-                    else
-                        addr2 = addr1 + 1;
- 
+                    if ((addr1 + 1) % wboundary == 0) addr2 = (addr1 + 1) - wboundary; else addr2 = addr1 + 1;
                     data_wr_wrap = addr2;
                 end
- 
                 4'b1101: begin
                     mem[awaddrt] = wdata[7:0];
- 
-                    if ((awaddrt + 1) % wboundary == 0)
-                        addr1 = (awaddrt + 1) - wboundary;
-                    else
-                        addr1 = awaddrt + 1;
- 
+                    if ((awaddrt + 1) % wboundary == 0) addr1 = (awaddrt + 1) - wboundary; else addr1 = awaddrt + 1;
                     mem[addr1] = wdata[23:16];
- 
-                    if ((addr1 + 1) % wboundary == 0)
-                        addr2 = (addr1 + 1) - wboundary;
-                    else
-                        addr2 = addr1 + 1;
- 
+                    if ((addr1 + 1) % wboundary == 0) addr2 = (addr1 + 1) - wboundary; else addr2 = addr1 + 1;
                     mem[addr2] = wdata[31:24];
- 
-                    if ((addr2 + 1) % wboundary == 0)
-                        addr3 = (addr2 + 1) - wboundary;
-                    else
-                        addr3 = addr2 + 1;
- 
+                    if ((addr2 + 1) % wboundary == 0) addr3 = (addr2 + 1) - wboundary; else addr3 = addr2 + 1;
                     data_wr_wrap = addr3;
                 end
- 
                 4'b1110: begin
                     mem[awaddrt] = wdata[15:8];
- 
-                    if ((awaddrt + 1) % wboundary == 0)
-                        addr1 = (awaddrt + 1) - wboundary;
-                    else
-                        addr1 = awaddrt + 1;
- 
+                    if ((awaddrt + 1) % wboundary == 0) addr1 = (awaddrt + 1) - wboundary; else addr1 = awaddrt + 1;
                     mem[addr1] = wdata[23:16];
- 
-                    if ((addr1 + 1) % wboundary == 0)
-                        addr2 = (addr1 + 1) - wboundary;
-                    else
-                        addr2 = addr1 + 1;
- 
+                    if ((addr1 + 1) % wboundary == 0) addr2 = (addr1 + 1) - wboundary; else addr2 = addr1 + 1;
                     mem[addr2] = wdata[31:24];
- 
-                    if ((addr2 + 1) % wboundary == 0)
-                        addr3 = (addr2 + 1) - wboundary;
-                    else
-                        addr3 = addr2 + 1;
- 
+                    if ((addr2 + 1) % wboundary == 0) addr3 = (addr2 + 1) - wboundary; else addr3 = addr2 + 1;
                     data_wr_wrap = addr3;
                 end
- 
                 4'b1111: begin
                     mem[awaddrt] = wdata[7:0];
- 
-                    if ((awaddrt + 1) % wboundary == 0)
-                        addr1 = (awaddrt + 1) - wboundary;
-                    else
-                        addr1 = awaddrt + 1;
- 
+                    if ((awaddrt + 1) % wboundary == 0) addr1 = (awaddrt + 1) - wboundary; else addr1 = awaddrt + 1;
                     mem[addr1] = wdata[15:8];
- 
-                    if ((addr1 + 1) % wboundary == 0)
-                        addr2 = (addr1 + 1) - wboundary;
-                    else
-                        addr2 = addr1 + 1;
- 
+                    if ((addr1 + 1) % wboundary == 0) addr2 = (addr1 + 1) - wboundary; else addr2 = addr1 + 1;
                     mem[addr2] = wdata[23:16];
- 
-                    if ((addr2 + 1) % wboundary == 0)
-                        addr3 = (addr2 + 1) - wboundary;
-                    else
-                        addr3 = addr2 + 1;
- 
+                    if ((addr2 + 1) % wboundary == 0) addr3 = (addr2 + 1) - wboundary; else addr3 = addr2 + 1;
                     mem[addr3] = wdata[31:24];
- 
-                    if ((addr3 + 1) % wboundary == 0)
-                        addr4 = (addr3 + 1) - wboundary;
-                    else
-                        addr4 = addr3 + 1;
- 
+                    if ((addr3 + 1) % wboundary == 0) addr4 = (addr3 + 1) - wboundary; else addr4 = addr3 + 1;
                     data_wr_wrap = addr4;
                 end
             endcase
         end
     endfunction
  
-    //////////////////////////////////////////////////////////////
-    // Fixed-mode read
-    //////////////////////////////////////////////////////////////
     function [31:0] read_data_fixed(input [31:0] addr, input [2:0] arsize);
         begin
             case (arsize)
-                3'b000: begin
-                    rdata[7:0] = mem[addr];
-                end
- 
-                3'b001: begin
-                    rdata[7:0]  = mem[addr];
-                    rdata[15:8] = mem[addr + 1];
-                end
- 
-                3'b010: begin
-                    rdata[7:0]   = mem[addr];
-                    rdata[15:8]  = mem[addr + 1];
-                    rdata[23:16] = mem[addr + 2];
-                    rdata[31:24] = mem[addr + 3];
-                end
+                3'b000: begin rdata[7:0] = mem[addr]; end
+                3'b001: begin rdata[7:0] = mem[addr]; rdata[15:8] = mem[addr + 1]; end
+                3'b010: begin rdata[7:0] = mem[addr]; rdata[15:8] = mem[addr + 1]; rdata[23:16] = mem[addr + 2]; rdata[31:24] = mem[addr + 3]; end
             endcase
- 
             read_data_fixed = addr;
         end
     endfunction
  
-    //////////////////////////////////////////////////////////////
-    // Incr-mode read
-    //////////////////////////////////////////////////////////////
     reg [31:0] rnext_addr = 0;
     function [31:0] read_data_incr(input [31:0] addr, input [2:0] arsize);
         begin
             case (arsize)
-                3'b000: begin
-                    rdata[7:0] = mem[addr];
-                    rnext_addr = addr + 1;
-                end
- 
-                3'b001: begin
-                    rdata[7:0]  = mem[addr];
-                    rdata[15:8] = mem[addr + 1];
-                    rnext_addr  = addr + 2;
-                end
- 
-                3'b010: begin
-                    rdata[7:0]   = mem[addr];
-                    rdata[15:8]  = mem[addr + 1];
-                    rdata[23:16] = mem[addr + 2];
-                    rdata[31:24] = mem[addr + 3];
-                    rnext_addr   = addr + 4;
-                end
+                3'b000: begin rdata[7:0] = mem[addr]; rnext_addr = addr + 1; end
+                3'b001: begin rdata[7:0] = mem[addr]; rdata[15:8] = mem[addr + 1]; rnext_addr = addr + 2; end
+                3'b010: begin rdata[7:0] = mem[addr]; rdata[15:8] = mem[addr + 1]; rdata[23:16] = mem[addr + 2]; rdata[31:24] = mem[addr + 3]; rnext_addr = addr + 4; end
             endcase
- 
             read_data_incr = rnext_addr;
         end
     endfunction
  
-    //////////////////////////////////////////////////////////////
-    // Wrap-mode read
-    //////////////////////////////////////////////////////////////
     reg [31:0] raddr1 = 0, raddr2 = 0, raddr3 = 0, raddr4 = 0;
     function [31:0] read_data_wrap(input [31:0] addr, input [2:0] arsize, input [7:0] rboundary);
         begin
             case (arsize)
                 3'b000: begin
                     rdata[7:0] = mem[addr];
- 
-                    if (((addr + 1) % rboundary) == 0)
-                        raddr1 = (addr + 1) - rboundary;
-                    else
-                        raddr1 = (addr + 1);
- 
+                    if (((addr + 1) % rboundary) == 0) raddr1 = (addr + 1) - rboundary; else raddr1 = (addr + 1);
                     read_data_wrap = raddr1;
                 end
- 
                 3'b001: begin
                     rdata[7:0] = mem[addr];
- 
-                    if (((addr + 1) % rboundary) == 0)
-                        raddr1 = (addr + 1) - rboundary;
-                    else
-                        raddr1 = (addr + 1);
- 
+                    if (((addr + 1) % rboundary) == 0) raddr1 = (addr + 1) - rboundary; else raddr1 = (addr + 1);
                     rdata[15:8] = mem[raddr1];
- 
-                    if (((raddr1 + 1) % rboundary) == 0)
-                        raddr2 = (raddr1 + 1) - rboundary;
-                    else
-                        raddr2 = (raddr1 + 1);
- 
+                    if (((raddr1 + 1) % rboundary) == 0) raddr2 = (raddr1 + 1) - rboundary; else raddr2 = (raddr1 + 1);
                     read_data_wrap = raddr2;
                 end
- 
                 3'b010: begin
                     rdata[7:0] = mem[addr];
- 
-                    if (((addr + 1) % rboundary) == 0)
-                        raddr1 = (addr + 1) - rboundary;
-                    else
-                        raddr1 = (addr + 1);
- 
-                    rdata[15:8] = mem[addr1];
- 
-                    if (((raddr1 + 1) % rboundary) == 0)
-                        raddr2 = (raddr1 + 1) - rboundary;
-                    else
-                        raddr2 = (raddr1 + 1);
- 
+                    if (((addr + 1) % rboundary) == 0) raddr1 = (addr + 1) - rboundary; else raddr1 = (addr + 1);
+                    rdata[15:8] = mem[raddr1];
+                    if (((raddr1 + 1) % rboundary) == 0) raddr2 = (raddr1 + 1) - rboundary; else raddr2 = (raddr1 + 1);
                     rdata[23:16] = mem[raddr2];
- 
-                    if (((raddr2 + 1) % rboundary) == 0)
-                        raddr3 = (raddr2 + 1) - rboundary;
-                    else
-                        raddr3 = (raddr2 + 1);
- 
+                    if (((raddr2 + 1) % rboundary) == 0) raddr3 = (raddr2 + 1) - rboundary; else raddr3 = (raddr2 + 1);
                     rdata[31:24] = mem[raddr3];
- 
-                    if (((raddr3 + 1) % rboundary) == 0)
-                        raddr4 = (raddr3 + 1) - rboundary;
-                    else
-                        raddr4 = (raddr3 + 1);
- 
-                    read_data_wrap = addr4;
+                    if (((raddr3 + 1) % rboundary) == 0) raddr4 = (raddr3 + 1) - rboundary; else raddr4 = (raddr3 + 1);
+                    read_data_wrap = raddr4;
                 end
             endcase
         end
@@ -790,6 +334,7 @@ module axif_s (
             for (i = 0; i < 128; i = i + 1) begin
                 mem[i] <= 0;
             end
+            state <= idle;
         end else begin
             case (state)
                 idle: begin
@@ -833,7 +378,7 @@ module axif_s (
                 end
  
                 accept_wr: begin
-                    if (s_axi_awaddr < 128 && ((s_axi_awaddr + s_axi_awlen * 4 + 1) < 128)) begin
+                    if (s_axi_awaddr < 128 && (s_axi_awaddr + ((s_axi_awlen+ 1)*4) < 128)) begin
                         burst_len     <= s_axi_awlen + 1;
                         waddr         <= s_axi_awaddr;
                         state         <= wait_wdata;
@@ -875,39 +420,51 @@ module axif_s (
                                      {24'h0, (wdata[7:0] & {8{wstrb[0]}})};
                     state <= update_mem;
                 end
- 
+      
                 update_mem: begin
+                    // NOTE: the direct mem[waddr] <= data_write write that used to be
+                    // here has been removed. mem is a byte-wide array
+                    // (reg [7:0] mem [127:0]) so assigning the full 32-bit
+                    // data_write into a single byte location silently truncated
+                    // to the low byte and never touched waddr+1..waddr+3.
+                    // The correct byte-strobe-aware write is already performed
+                    // in check_br_len via data_wr_fixed/data_wr_incr/data_wr_wrap,
+                    // so this state now only preserves the original beat-latency
+                    // timing without corrupting memory.
                     if (count < 2) begin
-                        count      <= count + 1;
-                        state      <= update_mem;
-                        mem[waddr] <= data_write;
+                        count <= count + 1;
+                        state <= update_mem;
                     end else begin
-                        burst_len <= burst_len - 1;
                         count     <= 0;
                         state     <= check_br_len;
                     end
                 end
  
                 check_br_len: begin
-                    if (burst_len == 0) begin
-                        state <= send_ack;
-                    end else begin
-                        state <= wait_wdata;
-                        case (awburst)
-                            2'b00: begin  //// Fixed mode
-                                waddr <= data_wr_fixed(wstrb, waddr);
-                            end
- 
-                            2'b01: begin  //// Incr mode
-                                waddr <= data_wr_incr(wstrb, waddr);
-                            end
- 
-                            2'b10: begin  //// Wrapping
-                                boundary <= wrap_boundary(awlen, awsize);       //// calculate wrapping boundary
-                                waddr    <= data_wr_wrap(wstrb, waddr, boundary); //// generate next addr
-                            end
-                        endcase
-                    end
+                    // Always perform the byte-lane-aware write for the beat
+                    // that just completed - this must happen even on the
+                    // final beat, otherwise bytes above lane 0 are lost.
+                    case (awburst)
+                        2'b00: begin
+                            waddr <= data_wr_fixed(wstrb, waddr);
+                        end
+                        2'b01: begin
+                            waddr <= data_wr_incr(wstrb, waddr);
+                        end
+                        2'b10: begin
+                            boundary <= wrap_boundary(awlen, awsize);
+                            waddr    <= data_wr_wrap(wstrb, waddr, wrap_boundary(awlen, awsize));
+                        end
+                    endcase
+                      $display("[%0t] WRITE addr=%0d burst_len=%0d", $time, waddr, burst_len);
+                     if (burst_len == 1) begin
+                             burst_len <= 0;
+                             state <= send_ack;
+                         end
+                         else begin
+                             burst_len <= burst_len - 1;
+                             state <= wait_wdata;
+                         end
                 end
  
                 send_ack: begin
@@ -922,12 +479,13 @@ module axif_s (
                         state <= send_ack;
                     end
                 end
- 
+                
                 accept_rd: begin
-                    if (s_axi_araddr < 128 && ((s_axi_araddr + s_axi_arlen * 4 + 1) < 128)) begin
-                        rburst_len    <= s_axi_arlen;
+                     timer <= 0;
+                    if (s_axi_araddr < 128 && (s_axi_araddr + ((s_axi_arlen+1)*4) < 128)) begin
+                        rburst_len    <= s_axi_arlen+1;
                         raddr         <= s_axi_araddr;
-                        state         <= fetch_rdata;
+                        state         <= (s_axi_arlen == 0) ? fetch_ldata : fetch_rdata;
                         arsize        <= s_axi_arsize;
                         arlen         <= s_axi_arlen;
                         arburst       <= s_axi_arburst;
@@ -944,7 +502,20 @@ module axif_s (
                     if (count < 2) begin
                         count <= count + 1;
                         state <= fetch_rdata;
-                        rdata <= mem[raddr];
+                        // Changed <= to = for rdata here so the assignment style
+                        // matches read_data_fixed/read_data_incr/read_data_wrap,
+                        // which already use blocking assignments on rdata.
+                        // Mixing blocking and non-blocking assignments to the
+                        // same register within one clocked always block has
+                        // scheduler-dependent ordering and was the source of
+                        // the garbage rout value seen in simulation.
+                        case (arsize)
+                            3'b000: rdata = {24'h0, mem[raddr]};
+                            3'b001: rdata = {16'h0, mem[raddr+1], mem[raddr]};
+                            3'b010: rdata = {mem[raddr+3], mem[raddr+2], mem[raddr+1], mem[raddr]};
+                            default: rdata = {24'h0, mem[raddr]};
+                        endcase
+                        $display("[%0t] READ addr=%0d rdata=%h", $time, raddr, rdata);
                     end else begin
                         count <= 0;
                         state <= send_rdata;
@@ -955,7 +526,8 @@ module axif_s (
                     s_axi_rvalid <= 1'b1;
                     s_axi_rdata  <= rdata;
                     s_axi_rresp  <= 2'b00;
-                    if (s_axi_rready) begin
+                    $display("[%0t] SEND DATA addr=%0d data=%h rlast=%b",$time,raddr,rdata,s_axi_rlast);
+                    if (s_axi_rready==1) begin
                         state <= rcheck_br_len;
                     end else if (timer == 15) begin
                         state <= idle;
@@ -969,6 +541,7 @@ module axif_s (
                 rcheck_br_len: begin
                     rburst_len   <= rburst_len - 1;
                     s_axi_rvalid <= 1'b0;
+                    
                     case (arburst)
                         2'b00: begin
                             raddr <= read_data_fixed(raddr, arsize);
@@ -978,10 +551,10 @@ module axif_s (
                         end
                         2'b10: begin
                             rboundary <= wrap_boundary(arlen, arsize);
-                            raddr     <= read_data_wrap(raddr, arsize, rboundary);
+                            raddr     <= read_data_wrap(raddr, arsize, wrap_boundary(arlen, arsize));
                         end
                     endcase
- 
+                         $display("[%0t] NEXT ADDR=%0d remaining=%0d",$time,raddr,rburst_len);
                     if (rburst_len == 1) begin
                         state <= fetch_ldata;
                     end else begin
@@ -993,9 +566,17 @@ module axif_s (
                     if (count < 2) begin
                         count <= count + 1;
                         state <= fetch_ldata;
-                        rdata <= mem[raddr];
+                        // Same fix as fetch_rdata: blocking assignment on rdata
+                        // to match the style used inside the read_data_* functions.
+                        case (arsize)
+                            3'b000: rdata = {24'h0, mem[raddr]};
+                            3'b001: rdata = {16'h0, mem[raddr+1], mem[raddr]};
+                            3'b010: rdata = {mem[raddr+3], mem[raddr+2], mem[raddr+1], mem[raddr]};
+                            default: rdata = {24'h0, mem[raddr]};
+                        endcase
                     end else begin
                         count        <= 0;
+                        timer        <= 0;
                         state        <= send_rlast;
                         s_axi_rvalid <= 1'b1;
                         s_axi_rdata  <= rdata;
@@ -1005,7 +586,7 @@ module axif_s (
                 end
  
                 send_rlast: begin
-                    if (s_axi_rready == 1'b1) begin
+                    if (s_axi_rready==1) begin
                         state        <= idle;
                         s_axi_rvalid <= 1'b0;
                         s_axi_rdata  <= 0;
@@ -1025,5 +606,5 @@ module axif_s (
             endcase
         end
     end
- 
+  
 endmodule
