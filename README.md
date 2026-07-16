@@ -87,15 +87,15 @@ This is simulation-level confidence, not formal verification — there's no UVM 
 ### AXI4 Full — Write/Read Bursts
 
 **FIXED burst**
-![AXI4 Full FIXED mode](AXI-FULL/SIMULATION RESULTS/axi_full_fixed_mode.png)
+![AXI4 Full FIXED mode](AXI-FULL/SIMULATION_RESULTS/axi_full_fixed_mode.png)
 
 **INCR burst**
-![AXI4 Full INCR mode](AXI-FULL/SIMULATION RESULTS/axi_full_INCR_mode.png)
-![AXI4 Full INCR mode continued](AXI-FULL/SIMULATION RESULTS/axi_full_INCR_mode_cont.png)
+![AXI4 Full INCR mode](AXI-FULL/SIMULATION_RESULTS/axi_full_INCR_mode.png)
+![AXI4 Full INCR mode continued](AXI-FULL/SIMULATION_RESULTS/axi_full_INCR_mode_cont.png)
 
-**WRAP burst** — address wraps back to the boundary mid-burst
-![AXI4 Full WRAP mode](AXI-FULL/SIMULATION RESULTS/axi_full_wrap_mode.png)
-![AXI4 Full WRAP mode continued](AXI-FULL/SIMULATION RESULTS/axi_full_wrap_mode_contd.png)
+**WRAP burst** 
+![AXI4 Full WRAP mode](AXI-FULL/SIMULATION_RESULTS/axi_full_wrap_mode.png)
+![AXI4 Full WRAP mode continued](AXI-FULL/SIMULATION_RESULTS/axi_full_wrap_mode_contd.png)
 
 ## Tools
 
