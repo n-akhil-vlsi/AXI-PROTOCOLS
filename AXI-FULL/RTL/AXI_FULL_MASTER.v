@@ -12,7 +12,7 @@ module axif_m (
     output reg  [3:0]  m_axi_awcache,
     output reg  [2:0]  m_axi_awprot,
     output reg  [3:0]  m_axi_awqos,
-    output reg  [4:0]  m_axi_awuser,
+    output reg  [4:0]  m_axi_awuser,                 //most of these signnals are application specific.so we dont use all the signals.
     output reg         m_axi_awvalid,
     input  wire        m_axi_awready,
  
@@ -48,7 +48,7 @@ module axif_m (
     input  wire        m_axi_rvalid,
     output reg         m_axi_rready,
  
-    input  wire        op_start,
+    input  wire        op_start,                     //form here these signals are given by us external to the master.
     output reg         busy,
  
     input  wire        wr,
@@ -69,23 +69,22 @@ module axif_m (
                detect_op        = 1,
                send_waddr       = 2,
                send_wdata       = 3,
-               wdata_last       = 4,
-               wait_for_wr_resp = 5,
-               comp_wr_tx       = 6,
-               no_ack_waddr     = 7,
-               no_ack_wdata     = 8,
-               send_raddr       = 9,
-               read_rdata       = 10,
-               no_ack_raddr     = 11,
-               no_ack_rdata     = 12,
-               comp_rd_tx       = 13;
+               wait_for_wr_resp = 4,
+               comp_wr_tx       = 5,
+               no_ack_waddr     = 6,
+               no_ack_wdata     = 7,
+               send_raddr       = 8,
+               read_rdata       = 9,
+               no_ack_raddr     = 10,
+               no_ack_rdata     = 11,
+               comp_rd_tx       = 12;
  
     integer burst_count = 0, wr_count = 0, rd_count = 0;
     reg [3:0]  state = idle, next_state = idle;
     reg [31:0] din   = 0;
  
     initial begin
-        m_axi_awvalid = 0;
+        m_axi_awvalid = 0;             //making all the output signals to the masters low.
         m_axi_awid    = 0;
         m_axi_awaddr  = 0;
         m_axi_awprot  = 0;
@@ -160,7 +159,7 @@ module axif_m (
                     m_axi_rready  <= 0;
                     burst_count   <= 0;
                     din           <= 0;
-                    busy          <= 0;
+                    busy          <= 0;                           //busy is low when it is in the idle mode and high when it is in the other modes.
                     if (op_start)
                         state <= detect_op;
                     else
@@ -168,7 +167,7 @@ module axif_m (
                 end
  
                 detect_op: begin
-                    busy <= 1;
+                    busy <= 1;                                    //if wr is 1 then write ,if 0 then read.
                     if (wr)
                         state <= send_waddr;
                     else
@@ -176,10 +175,6 @@ module axif_m (
                 end
  
                 send_waddr: begin
-                    // FIX 1: was "din <= wr_din*5;" - the multiply corrupted
-                    // the data actually written to memory. din must simply
-                    // hold wr_din so every beat of the burst sends the same
-                    // (or correctly-derived) write data.
                     din           <= wr_din*5;
                     m_axi_awaddr  <= wr_addr;
                     m_axi_awvalid <= 1;
@@ -201,7 +196,7 @@ module axif_m (
                         m_axi_awlen   <= 0;
                         m_axi_awsize  <= 0;
                         m_axi_awburst <= 0;
-                    end else if (wr_count == 15) begin
+                    end else if (wr_count == 15) begin                //in real life we dont ack state ,just for simulation we are having it.
                         state    <= no_ack_waddr;
                         wr_count <= 0;
                     end else begin
@@ -210,21 +205,18 @@ module axif_m (
                     end
                 end
   
-          send_wdata: begin
+                send_wdata: begin
                     if (m_axi_wready && burst_count != 1) begin
                         burst_count <= burst_count - 1;
                         din=din*5;
-                        m_axi_wdata <= din;
+                        m_axi_wdata <= din;                               //we ahve only 1 din from that we are producing other din by multiplying it by 5.
                         state       <= send_wdata;
                         wr_count    <= 0;
                     end else if (m_axi_wready && burst_count == 1) begin
-                        // last beat's handshake already happened here -
-                        // go straight to waiting for the write response,
-                        // don't wait for a second wready pulse that never comes
                         burst_count  <= burst_count - 1;
                         m_axi_wdata  <= din;
-                        m_axi_wlast  <= 1;
                         m_axi_wvalid <= 1;
+                        m_axi_wlast  <= 1;
                         state        <= wait_for_wr_resp;
                         wr_count     <= 0;
                     end else if (wr_count == 15) begin
@@ -233,11 +225,9 @@ module axif_m (
                         state    <= send_wdata;
                         wr_count <= wr_count + 1;
                     end
-                    $display("[%0t] MASTER SEND WDATA burst_count=%0d WLAST=%b",
-                             $time, burst_count, m_axi_wlast);
+                    $display("[%0t] MASTER SEND WDATA burst_count=%0d WLAST=%b",$time, burst_count, m_axi_wlast);
                 end
                  
-                // wdata_last state removed - no longer used
  
                 no_ack_wdata, no_ack_waddr: begin
                     state <= wait_for_wr_resp;
@@ -259,39 +249,24 @@ module axif_m (
                 end
  
                 comp_wr_tx: begin
-                    m_axi_awaddr  <= 0;
+                    m_axi_awaddr  <= 0;                 //making all the signals low after the write transaction is completed.
                     m_axi_awvalid <= 0;
                     m_axi_wvalid  <= 0;
                     m_axi_wlast   <= 0;
                     m_axi_wdata   <= 0;
                     burst_count   <= 0;
                     m_axi_bready  <= 0;
-                    // FIX 4 (cleanup): was "busy <= 1;" here, which is wrong -
-                    // the write transaction is complete at this point, so
-                    // busy should be released. idle already clears busy on
-                    // the following cycle, so this was mostly masked, but
-                    // it was inconsistent and worth correcting.
-                    busy          <= 0;
+                    busy          <= 0;                 //busy is low when it is in the idle mode and high when it is in the other modes.
                     state         <= idle;
                 end
  
                 send_raddr: begin
-                    m_axi_araddr  <= rd_addr;
+                    m_axi_araddr  <= rd_addr;               //all the output signals of master which are related to the read are made high nad updated.
                     m_axi_arlen   <= rd_burst_len;
                     m_axi_arsize  <= 3'b010;
                     m_axi_arburst <= rd_burst_type;
                     m_axi_arvalid <= 1;
                     m_axi_rready  <= 0;
- 
-                    // FIX 3: was "if (m_axi_arready == 1 && m_axi_arvalid==1)".
-                    // m_axi_arvalid was just set with a non-blocking
-                    // assignment two lines above, so checking it in the same
-                    // cycle read its OLD value, not the new 1 - this could
-                    // stall/miss the address handshake entirely and is the
-                    // reason the read burst was never completing (rout
-                    // stuck at 0). The write path's send_waddr never had
-                    // this extra self-check, so this now matches that
-                    // working pattern.
                     if (m_axi_arready == 1) begin
                         state         <= read_rdata;
                         m_axi_arvalid <= 0;
@@ -306,14 +281,14 @@ module axif_m (
                 end
  
                 read_rdata: begin
-                    m_axi_araddr  <= 0;
+                    m_axi_araddr  <= 0;              //signals related to the read read address are made low,as the read address is captured.
                     m_axi_arlen   <= 0;
                     m_axi_arsize  <= 0;
                     m_axi_arburst <= 0;
                     m_axi_arvalid <= 0;
                     m_axi_rready  <= 1;
  
-                    if ((m_axi_rvalid == 1'b1) && (m_axi_rlast != 1)) begin
+                    if ((m_axi_rvalid == 1'b1) && (m_axi_rlast != 1)) begin  //in the write we use burst count,here we use the rlast to identify the last beat.
                         rout     <= m_axi_rdata;
                         resp     <= m_axi_rresp;
                         state    <= read_rdata;
@@ -321,7 +296,7 @@ module axif_m (
                     end else if ((m_axi_rvalid == 1'b1) && (m_axi_rlast == 1)) begin
                         rout     <= m_axi_rdata;
                         resp     <= m_axi_rresp;
-                        state    <= comp_rd_tx;
+                        state    <= comp_rd_tx;                                // when the last beat is received we go to the comp_rd_tx state.
                         rd_count <= 0;
                     end else if (rd_count == 15) begin
                         state    <= no_ack_rdata;
@@ -342,9 +317,6 @@ module axif_m (
                 comp_rd_tx: begin
                     m_axi_rready <= 0;
                     state        <= idle;
-                    // rout/resp intentionally NOT cleared here - they hold
-                    // the last beat's captured data/response for the user
-                    // to read after the transaction completes.
                 end
  
                 default: state <= idle;

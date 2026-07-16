@@ -58,10 +58,7 @@ module axif_tb;
     begin
         if(DUT.uut.m_axi_rvalid && DUT.uut.m_axi_rready)
         begin
-            $display("[%0t] READ DATA = %h  RLAST = %b",
-                     $time,
-                     DUT.uut.m_axi_rdata,
-                     DUT.uut.m_axi_rlast);
+            $display("[%0t] READ DATA = %h  RLAST = %b", $time,DUT.uut.m_axi_rdata,DUT.uut.m_axi_rlast);
         end
     end
 
@@ -71,10 +68,7 @@ module axif_tb;
     begin
         if(DUT.uut.m_axi_wvalid && DUT.uut.m_axi_wready)
         begin
-            $display("[%0t] WRITE DATA = %h  WLAST = %b",
-                     $time,
-                     DUT.uut.m_axi_wdata,
-                     DUT.uut.m_axi_wlast);
+            $display("[%0t] WRITE DATA = %h  WLAST = %b",$time,DUT.uut.m_axi_wdata,DUT.uut.m_axi_wlast);
         end
     end
 
@@ -103,9 +97,7 @@ module axif_tb;
 
     repeat(2) @(posedge clk);
 
-    //--------------------------------------------------
     // FIXED WRITE BURST
-    //--------------------------------------------------
 
     wr             = 1;
     wr_addr        = 32'd16;      // Fixed Address
@@ -139,9 +131,8 @@ module axif_tb;
 
     repeat(5)
         @(posedge clk);
-                //--------------------------------------------------
+
         // FIXED READ BURST
-        //--------------------------------------------------
 
         wr = 0;
 
