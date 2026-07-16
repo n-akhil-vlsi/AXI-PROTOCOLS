@@ -84,10 +84,18 @@ This is simulation-level confidence, not formal verification — there's no UVM 
 
 ## Sample waveforms
 
-<!-- Add screenshots here, e.g.: -->
-<!-- ![AXI4 Full Write Transaction](axi-full/sim/axi_full_write.png) -->
+### AXI4 Full — Write/Read Bursts
 
----
+**FIXED burst**
+![AXI4 Full FIXED mode](axi-full/sim/axi_full_fixed_mode.png)
+
+**INCR burst**
+![AXI4 Full INCR mode](axi-full/sim/axi_full_INCR_mode.png)
+![AXI4 Full INCR mode continued](axi-full/sim/axi_full_INCR_mode_cont.png)
+
+**WRAP burst** — address wraps back to the boundary mid-burst
+![AXI4 Full WRAP mode](axi-full/sim/axi_full_wrap_mode.png)
+![AXI4 Full WRAP mode continued](axi-full/sim/axi_full_wrap_mode_contd.png)
 
 ## Tools
 
